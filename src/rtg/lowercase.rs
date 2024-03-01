@@ -1,6 +1,9 @@
 use rand::{Rng, thread_rng};
 use crate::rtg::RandomTokenGenerator;
+use crate::rtg::words_simpleton::get_simpleton_propercase_words;
 
+/// Maintain a list of words and return one as a token upon request.
+/// The words are all lowercase.
 pub struct LowercaseWordsRTG {
     token_list: Vec<String>,
 }
@@ -9,7 +12,14 @@ impl LowercaseWordsRTG {
 }
 
 impl RandomTokenGenerator for LowercaseWordsRTG {
-    fn new(token_list: Vec<impl ToString>) -> Self {
+    fn new() -> Self {
+        LowercaseWordsRTG {
+            token_list: get_simpleton_propercase_words().iter()
+                                                        .map(|t| t.to_string().to_ascii_lowercase())
+                                                        .collect()
+        }
+    }
+    fn with_token_list(token_list: Vec<impl ToString>) -> Self {
         LowercaseWordsRTG {
             token_list: token_list.iter()
                                   .map(|t| t.to_string().to_ascii_lowercase())
@@ -34,7 +44,7 @@ mod tests {
     fn test_rtg() {
         let input_list = vec!["FOO", "BAR", "BAZ"];
         let output_list = vec!["foo", "bar", "baz"];
-        let tester: Box<dyn RandomTokenGenerator> = Box::new(LowercaseWordsRTG::new(input_list.clone()));
+        let tester: Box<dyn RandomTokenGenerator> = Box::new(LowercaseWordsRTG::with_token_list(input_list.clone()));
 
         println!("Token: {}", tester.get_token());
         for _ in 0..100 {

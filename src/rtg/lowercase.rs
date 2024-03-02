@@ -1,11 +1,12 @@
+use std::fmt::{Display, Formatter};
 use rand::{Rng, thread_rng};
 use crate::rtg::RandomTokenGenerator;
-use crate::rtg::words_simpleton::get_simpleton_propercase_words;
+use crate::rtg::default_lists::get_simpleton_words;
 
 /// Maintain a list of words and return one as a token upon request.
 /// The words are all lowercase.
 pub struct LowercaseWordsRTG {
-    token_list: Vec<String>,
+    token_list: Vec<String>
 }
 
 impl LowercaseWordsRTG {
@@ -13,12 +14,9 @@ impl LowercaseWordsRTG {
 
 impl RandomTokenGenerator for LowercaseWordsRTG {
     fn new() -> Self {
-        LowercaseWordsRTG {
-            token_list: get_simpleton_propercase_words().iter()
-                                                        .map(|t| t.to_string().to_ascii_lowercase())
-                                                        .collect()
-        }
+        Self::with_token_list(get_simpleton_words())
     }
+
     fn with_token_list(token_list: Vec<impl ToString>) -> Self {
         LowercaseWordsRTG {
             token_list: token_list.iter()
@@ -34,6 +32,12 @@ impl RandomTokenGenerator for LowercaseWordsRTG {
     }
 }
 
+impl Display for LowercaseWordsRTG {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "lowercase({})", self.token_list.len())
+
+    }
+}
 
 
 #[cfg(test)]

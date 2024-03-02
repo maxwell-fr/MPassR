@@ -2,10 +2,18 @@
 pub mod lowercase;
 pub mod uppercase;
 pub mod propercase;
-mod words_simpleton;
+pub mod symbol;
+pub mod default_lists;
+
+pub use lowercase::LowercaseWordsRTG;
+pub use uppercase::UppercaseWordsRTG;
+pub use propercase::PropercaseWordsRTG;
+pub use symbol::SymbolsRTG;
+
+use std::fmt::Display;
 
 /// The shared trait for all token generators.
-pub trait RandomTokenGenerator {
+pub trait RandomTokenGenerator : Display {
     /// Get a new RandomTokenGenerator
     /// This uses a default list of tokens provided by the trait implementor.
     fn new() -> Self where Self: Sized;

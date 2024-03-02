@@ -1,27 +1,27 @@
 use std::fmt::{Display, Formatter};
 use rand::{Rng, thread_rng};
 use crate::rtg::RandomTokenGenerator;
-use crate::rtg::default_lists::get_simpleton_words;
+use crate::rtg::default_lists::get_ez_ascii_symbols;
 
 /// Maintain a list of words and return one as a token upon request.
-/// The words are all UPPERCASE.
-pub struct UppercaseWordsRTG {
+/// The words are all lowercase.
+pub struct SymbolsRTG {
     token_list: Vec<String>
 }
 
-impl UppercaseWordsRTG {
+impl SymbolsRTG {
 }
 
-impl RandomTokenGenerator for UppercaseWordsRTG {
+impl RandomTokenGenerator for SymbolsRTG {
     fn new() -> Self {
-        Self::with_token_list(get_simpleton_words())
+        Self::with_token_list(get_ez_ascii_symbols())
     }
 
     fn with_token_list(token_list: Vec<impl ToString>) -> Self {
-        UppercaseWordsRTG {
+        SymbolsRTG {
             token_list: token_list.iter()
-                                  .map(|t| t.to_string().to_ascii_uppercase())
-                                  .collect()
+                                  .map(|t| t.to_string())
+                                  .collect(),
         }
     }
 
@@ -32,13 +32,13 @@ impl RandomTokenGenerator for UppercaseWordsRTG {
     }
 }
 
-
-impl Display for UppercaseWordsRTG {
+impl Display for SymbolsRTG {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "uppercase({})", self.token_list.len())
+        write!(f, "symbol({})", self.token_list.len())
 
     }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -46,9 +46,9 @@ mod tests {
 
     #[test]
     fn test_rtg() {
-        let input_list = vec!["foo", "bar", "baz"];
-        let output_list = vec!["FOO", "BAR", "BAZ"];
-        let tester: Box<dyn RandomTokenGenerator> = Box::new(UppercaseWordsRTG::with_token_list(input_list.clone()));
+        let input_list = vec!["#", "@", "!"];
+        let output_list = vec!["#", "@", "!"];
+        let tester: Box<dyn RandomTokenGenerator> = Box::new(SymbolsRTG::with_token_list(input_list.clone()));
 
         println!("Token: {}", tester.get_token());
         for _ in 0..100 {

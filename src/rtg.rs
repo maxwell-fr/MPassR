@@ -3,12 +3,14 @@ pub mod lowercase;
 pub mod uppercase;
 pub mod propercase;
 pub mod symbol;
+pub mod number;
 pub mod default_lists;
 
 pub use lowercase::LowercaseWordsRTG;
 pub use uppercase::UppercaseWordsRTG;
 pub use propercase::PropercaseWordsRTG;
 pub use symbol::SymbolsRTG;
+pub use number::NumbersRTG;
 
 use std::fmt::Display;
 

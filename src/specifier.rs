@@ -2,7 +2,7 @@
 
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
-use crate::rtg::{LowercaseWordsRTG, PropercaseWordsRTG, SymbolsRTG, UppercaseWordsRTG};
+use crate::rtg::{LowercaseWordsRTG, NumbersRTG, PropercaseWordsRTG, SymbolsRTG, UppercaseWordsRTG};
 use crate::rtg::RandomTokenGenerator;
 use crate::rtg::default_lists::{get_ez_ascii_symbols, get_simpleton_words};
 
@@ -17,7 +17,7 @@ struct RTGenerators {
     propercase: Rc<PropercaseWordsRTG>,
     symbols: Rc<SymbolsRTG>,
     space: Rc<SymbolsRTG>,
-    //numbers
+    numbers: Rc<NumbersRTG>
 }
 
 impl Specifier {
@@ -43,7 +43,7 @@ impl Specifier {
         let propercase = Rc::new(PropercaseWordsRTG::with_token_list(word_list));
         let symbols = Rc::new(SymbolsRTG::with_token_list(symbol_list));
         let space = Rc::new(SymbolsRTG::with_token_list(vec![' ']));
-        //todo: numbers
+        let numbers = Rc::new(NumbersRTG::new());
 
         let rtgs = RTGenerators {
             lowercase,
@@ -51,7 +51,7 @@ impl Specifier {
             propercase,
             symbols,
             space,
-            //numbers
+            numbers
         };
 
         let spec_tokens = Self::tokenize(spec_string, &rtgs);
@@ -110,7 +110,7 @@ impl Specifier {
                 //'r' => {}
                 //'x' => {}
                 //'z' => {}
-                //'0' => {}
+                '0' => rtgs.numbers.clone(),
                 '$' => rtgs.symbols.clone(),
                 ' ' => rtgs.space.clone(),
                 _ => return Err(index)
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_specifier() {
-        let tester = Specifier::try_parse("w u i $").unwrap();
+        let tester = Specifier::try_parse("w u i $ 0").unwrap();
 
 
         println!("Specifier: {}", tester);

@@ -3,8 +3,7 @@ use rand::{Rng, thread_rng};
 use crate::rtg::RandomTokenGenerator;
 use crate::rtg::default_lists::get_ez_ascii_symbols;
 
-/// Maintain a list of words and return one as a token upon request.
-/// The words are all lowercase.
+/// Maintain a list of symbols and return one as a token upon request.
 pub struct SymbolsRTG {
     token_list: Vec<String>
 }

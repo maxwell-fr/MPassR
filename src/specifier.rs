@@ -3,6 +3,7 @@
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 use crate::rtg::{LowercaseWordsRTG, NumbersRTG, PropercaseWordsRTG, SymbolsRTG, UppercaseWordsRTG};
+use crate::rtg::alphabet::AlphabetRTG;
 use crate::rtg::RandomTokenGenerator;
 use crate::rtg::default_lists::{get_ez_ascii_symbols, get_simpleton_words};
 
@@ -17,10 +18,22 @@ struct RTGenerators {
     propercase: Rc<PropercaseWordsRTG>,
     symbols: Rc<SymbolsRTG>,
     space: Rc<SymbolsRTG>,
-    numbers: Rc<NumbersRTG>
+    numbers: Rc<NumbersRTG>,
+    alphabet: Rc<AlphabetRTG>
 }
 
 impl Specifier {
+    /// Use the rules encoded in the spec string to produce a passphrase.
+    pub fn get_passphrase(&self) -> String {
+        let mut p = String::new();
+
+        for r in self.spec_tokens.iter() {
+            p.push_str(&r.get_token());
+        }
+
+        p
+    }
+
     /// Try to parse a spec string a build a Specifier using the default word
     /// and symbol lists.
     /// Returns a Result containing a new Specifier or an Error with failure details.
@@ -44,6 +57,7 @@ impl Specifier {
         let symbols = Rc::new(SymbolsRTG::with_token_list(symbol_list));
         let space = Rc::new(SymbolsRTG::with_token_list(vec![' ']));
         let numbers = Rc::new(NumbersRTG::new());
+        let alphabet = Rc::new(AlphabetRTG::new());
 
         let rtgs = RTGenerators {
             lowercase,
@@ -51,7 +65,8 @@ impl Specifier {
             propercase,
             symbols,
             space,
-            numbers
+            numbers,
+            alphabet
         };
 
         let spec_tokens = Self::tokenize(spec_string, &rtgs);
@@ -108,7 +123,7 @@ impl Specifier {
                 'u' => rtgs.uppercase.clone(),
                 'i' => rtgs.propercase.clone(),
                 //'r' => {}
-                //'x' => {}
+                'x' => rtgs.alphabet.clone(),
                 //'z' => {}
                 '0' => rtgs.numbers.clone(),
                 '$' => rtgs.symbols.clone(),
@@ -155,9 +170,15 @@ mod tests {
 
     #[test]
     fn test_specifier() {
-        let tester = Specifier::try_parse("w u i $ 0").unwrap();
-
+        let tester = Specifier::try_parse("w x u i $ 0").unwrap();
 
         println!("Specifier: {}", tester);
+    }
+
+    #[test]
+    fn test_passphrase() {
+        let tester = Specifier::try_parse("w x u i $ 0").unwrap();
+
+        println!("Passphrase: {}", tester.get_passphrase());
     }
 }

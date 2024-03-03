@@ -3,20 +3,23 @@ use rand::{Rng, thread_rng};
 use crate::rtg::RandomTokenGenerator;
 
 /// Maintain a list of numbers and return one as a token upon request.
-pub struct NumbersRTG {
+pub struct AlphabetRTG {
     token_list: Vec<String>
 }
 
-impl NumbersRTG {
+impl AlphabetRTG {
 }
 
-impl RandomTokenGenerator for NumbersRTG {
+impl RandomTokenGenerator for AlphabetRTG {
     fn new() -> Self {
-        Self::with_token_list(vec![0,1,2,3,4,5,6,7,8,9])
+        Self::with_token_list(vec!['a','b','c','d','e','f','g','h','i','j','k','l','m',
+                                   'n','o','p','q','r','s','t','u','v','w','x','y','z',
+                                   'A','B','C','D','E','F','G','H','I','J','K','L','M',
+                                   'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'])
     }
 
     fn with_token_list(token_list: Vec<impl ToString>) -> Self {
-        NumbersRTG {
+        AlphabetRTG {
             token_list: token_list.iter()
                                   .map(|t| t.to_string())
                                   .collect(),
@@ -30,9 +33,9 @@ impl RandomTokenGenerator for NumbersRTG {
     }
 }
 
-impl Display for NumbersRTG {
+impl Display for AlphabetRTG {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "number({})", self.token_list.len())
+        write!(f, "alphabet({})", self.token_list.len())
 
     }
 }
@@ -44,9 +47,9 @@ mod tests {
 
     #[test]
     fn test_rtg() {
-        let input_list = vec!["1", "2", "3"];
-        let output_list = vec!["1", "2", "3"];
-        let tester: Box<dyn RandomTokenGenerator> = Box::new(NumbersRTG::with_token_list(input_list.clone()));
+        let input_list = vec!["a", "b", "c"];
+        let output_list = vec!["a", "b", "c"];
+        let tester: Box<dyn RandomTokenGenerator> = Box::new(AlphabetRTG::with_token_list(input_list.clone()));
 
         println!("Token: {}", tester.get_token());
         for _ in 0..100 {

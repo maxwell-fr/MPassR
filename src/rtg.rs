@@ -4,6 +4,7 @@ pub mod uppercase;
 pub mod propercase;
 pub mod symbol;
 pub mod number;
+pub mod alphabet;
 pub mod default_lists;
 
 pub use lowercase::LowercaseWordsRTG;

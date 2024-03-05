@@ -71,3 +71,28 @@ pub fn get_simpleton_words() -> Vec<&'static str> {
         "snow", "limit"
     ]
 }
+
+/// Obtain a list of lowercase letters
+pub fn get_lowercase() -> Vec<char> {
+    vec!['a','b','c','d','e','f','g','h','i','j','k','l','m',
+         'n','o','p','q','r','s','t','u','v','w','x','y','z']
+}
+
+/// Get a list of uppercase letters
+pub fn get_uppercase() -> Vec<char> {
+    vec!['A','B','C','D','E','F','G','H','I','J','K','L','M',
+         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+}
+
+/// Get a list of upper and lowercase letters
+pub fn get_alphabet() -> Vec<char> {
+    vec!['A','B','C','D','E','F','G','H','I','J','K','L','M',
+         'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+         'a','b','c','d','e','f','g','h','i','j','k','l','m',
+         'n','o','p','q','r','s','t','u','v','w','x','y','z']
+}
+
+pub fn get_numbers() -> Vec<u8> {
+    vec![0,1,2,3,4,5,6,7,8,9]
+}
+

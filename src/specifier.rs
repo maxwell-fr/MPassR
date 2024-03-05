@@ -2,10 +2,9 @@
 
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
-use crate::rtg::{LowercaseWordsRTG, NumbersRTG, PropercaseWordsRTG, SymbolsRTG, UppercaseWordsRTG};
-use crate::rtg::alphabet::AlphabetRTG;
+use crate::rtg::RTG;
 use crate::rtg::RandomTokenGenerator;
-use crate::rtg::default_lists::{get_ez_ascii_symbols, get_simpleton_words};
+use crate::rtg::default_lists::{get_alphabet, get_ez_ascii_symbols, get_numbers, get_simpleton_words};
 
 pub struct Specifier {
     spec_tokens: Vec<Rc<dyn RandomTokenGenerator>>,
@@ -13,13 +12,15 @@ pub struct Specifier {
 }
 
 struct RTGenerators {
-    lowercase: Rc<LowercaseWordsRTG>,
-    uppercase: Rc<UppercaseWordsRTG>,
-    propercase: Rc<PropercaseWordsRTG>,
-    symbols: Rc<SymbolsRTG>,
-    space: Rc<SymbolsRTG>,
-    numbers: Rc<NumbersRTG>,
-    alphabet: Rc<AlphabetRTG>
+    lowercase: Rc<RTG>,
+    uppercase: Rc<RTG>,
+    propercase: Rc<RTG>,
+    symbols: Rc<RTG>,
+    space: Rc<RTG>,
+    numbers: Rc<RTG>,
+    alphabet: Rc<RTG>,
+    alphanum: Rc<RTG>,
+    alphanumsym: Rc<RTG>
 }
 
 impl Specifier {
@@ -51,13 +52,29 @@ impl Specifier {
             return Err(());
         }
 
-        let lowercase = Rc::new(LowercaseWordsRTG::with_token_list(word_list.clone()));
-        let uppercase = Rc::new(UppercaseWordsRTG::with_token_list(word_list.clone()));
-        let propercase = Rc::new(PropercaseWordsRTG::with_token_list(word_list));
-        let symbols = Rc::new(SymbolsRTG::with_token_list(symbol_list));
-        let space = Rc::new(SymbolsRTG::with_token_list(vec![' ']));
-        let numbers = Rc::new(NumbersRTG::new());
-        let alphabet = Rc::new(AlphabetRTG::new());
+        let lowercase = Rc::new(RTG::from(word_list.clone().iter().map(|s| s.to_string().to_ascii_lowercase()).collect::<Vec<String>>()));
+        let uppercase = Rc::new(RTG::from(word_list.clone().iter().map(|s| s.to_string().to_ascii_uppercase()).collect::<Vec<String>>()));
+        let propercase = Rc::new(RTG::from(word_list.clone().iter().map(|t| {
+            let s = t.to_string();
+            let mut c = s.chars();
+            let first_char = c.next();
+            if let Some(f) = first_char {
+                format!("{}{}", f.to_ascii_uppercase(), c.collect::<String>())
+            }
+            else {
+                String::new()
+            }
+        }).collect::<Vec<String>>()));
+        let symbols = Rc::new(RTG::from(symbol_list.clone()));
+        let space = Rc::new(RTG::new(vec![' ']));
+        let numbers = Rc::new(RTG::new(get_numbers()));
+        let alphabet = Rc::new(RTG::new(get_alphabet()));
+        let mut alphanum: Vec<String> = get_alphabet().iter().map(|s| s.to_string()).collect();
+        alphanum.extend(get_numbers().iter().map(|s| s.to_string()));
+        let mut alphanumsym = alphanum.clone();
+        alphanumsym.extend(symbol_list.clone());
+        let alphanum = Rc::new(RTG::new(alphanum));
+        let alphanumsym = Rc::new(RTG::new(alphanumsym));
 
         let rtgs = RTGenerators {
             lowercase,
@@ -66,7 +83,9 @@ impl Specifier {
             symbols,
             space,
             numbers,
-            alphabet
+            alphabet,
+            alphanum,
+            alphanumsym
         };
 
         let spec_tokens = Self::tokenize(spec_string, &rtgs);
@@ -123,8 +142,9 @@ impl Specifier {
                 'u' => rtgs.uppercase.clone(),
                 'i' => rtgs.propercase.clone(),
                 //'r' => {}
-                'x' => rtgs.alphabet.clone(),
-                //'z' => {}
+                'a' => rtgs.alphabet.clone(),
+                'x' => rtgs.alphanum.clone(),
+                'z' => rtgs.alphanumsym.clone(),
                 '0' => rtgs.numbers.clone(),
                 '$' => rtgs.symbols.clone(),
                 ' ' => rtgs.space.clone(),
@@ -170,14 +190,14 @@ mod tests {
 
     #[test]
     fn test_specifier() {
-        let tester = Specifier::try_parse("w x u i $ 0").unwrap();
+        let tester = Specifier::try_parse("w x u i $ 0 x z").unwrap();
 
         println!("Specifier: {}", tester);
     }
 
     #[test]
     fn test_passphrase() {
-        let tester = Specifier::try_parse("w x u i $ 0").unwrap();
+        let tester = Specifier::try_parse("w x u i $ 0 x z").unwrap();
 
         println!("Passphrase: {}", tester.get_passphrase());
     }

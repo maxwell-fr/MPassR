@@ -1,6 +1,8 @@
 //! [`RandomTokenGenerator`] trait
 //! [`RTG`] Struct
 pub mod default_lists;
+pub mod randomcap;
+pub use randomcap::RandomCapWordGenerator;
 
 use std::fmt::{Display, Formatter};
 use rand::{Rng, thread_rng};

@@ -1,33 +1,22 @@
 //! Generate passphrases based on specification strings.
 
-mod spectoken;
+pub mod spectoken;
+pub mod specifier_error;
 
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
+use crate::specifier::specifier_error::SpecifierError;
+use crate::specifier::spectoken::SpecToken;
 use crate::rtg::{RandomCapWordGenerator, RTG};
 use crate::rtg::RandomTokenGenerator;
 use crate::rtg::default_lists::{get_alphabet, get_ez_ascii_symbols, get_lowercase, get_numbers, get_simpleton_words, get_uppercase};
-use crate::specifier::spectoken::{SpecToken, SpecTokenError};
 
+/// Maintains the specifier token list as well as the RandomTokenGenerators
+/// uses to produce passphrases on demand.
 pub struct Specifier {
     spec_tokens: Vec<Rc<dyn RandomTokenGenerator>>,
     rtgs: HashMap<SpecToken, Rc<dyn RandomTokenGenerator>>
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub enum SpecifierError {
-    SpecTokenError(SpecTokenError),
-    EmptySymbolList,
-    EmptyWordList,
-    UnrecognizedChar(usize)
-}
-
-
-impl From<SpecTokenError> for SpecifierError {
-    fn from(value: SpecTokenError) -> Self {
-        SpecifierError::SpecTokenError(value)
-    }
 }
 
 

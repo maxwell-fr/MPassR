@@ -1,7 +1,11 @@
+//! [`RTG`] Struct
+
 use std::fmt::{Display, Formatter};
 use rand::{Rng, thread_rng};
 use crate::rtg::RandomTokenGenerator;
 
+/// A random token generator that produces a word
+/// with a single letter capitalized.
 pub struct RandomCapWordGenerator {
     token_list: Vec<String>
 }

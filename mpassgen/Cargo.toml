@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 mpass = { path = "../mpass" }
+regex = "1.10.3"

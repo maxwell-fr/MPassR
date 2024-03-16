@@ -7,4 +7,8 @@
 pub mod rtg;
 pub mod specifier;
 
+pub use specifier::Specifier;
+pub use rtg::RandomTokenGenerator;
+
+
 

@@ -6,6 +6,8 @@ pub mod specifier_error;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
+use rand::thread_rng;
+use rand::seq::SliceRandom;
 use crate::specifier::specifier_error::SpecifierError;
 use crate::specifier::spectoken::SpecToken;
 use crate::rtg::{RandomCapWordGenerator, RTG};
@@ -15,6 +17,7 @@ use crate::rtg::default_lists::{get_alphabet, get_ez_ascii_symbols, get_lowercas
 /// Maintains the specifier token list as well as the RandomTokenGenerators
 /// uses to produce passphrases on demand.
 pub struct Specifier {
+    shuffle: bool,
     spec_tokens: Vec<Rc<dyn RandomTokenGenerator>>,
     rtgs: HashMap<SpecToken, Rc<dyn RandomTokenGenerator>>
 }
@@ -23,13 +26,18 @@ pub struct Specifier {
 impl Specifier {
     /// Use the rules encoded in the spec string to produce a passphrase.
     pub fn get_passphrase(&self) -> String {
-        let mut p = String::new();
+        let mut p: Vec<String> = vec![];
 
         for r in self.spec_tokens.iter() {
-            p.push_str(&r.get_token());
+            p.push(r.get_token());
         }
 
-        p
+        if self.shuffle {
+            let mut rng = thread_rng();
+            p.shuffle(&mut rng);
+        }
+
+        p.join("")
     }
 
     /// Try to parse a spec string a build a Specifier using the default word
@@ -97,11 +105,15 @@ impl Specifier {
                     Rc::new(RTG::new(alphanum)));
         rtgs.insert(SpecToken::AnyChar,
                     Rc::new(RTG::new(alphanumsym)));
+        //add a dummy RTG for the shuffle token
+        rtgs.insert(SpecToken::Shuffle, Rc::new(RTG::new(vec![true])));
 
 
         let spec_tokens = Self::tokenize(spec_string, &rtgs)?;
+        let shuffle = spec_string.contains("?");
 
         Ok(Specifier {
+            shuffle,
             spec_tokens,
             rtgs
         })
@@ -109,13 +121,22 @@ impl Specifier {
 
     /// Validate a spec string.
     /// Returns a Result with either Ok or an Err containing the offset of the first
-    /// invalid character.
+    /// invalid character. If the string is empty or only has shuffle tokens,
+    /// it will return a value equal to the length of the spec string.
     pub fn check_spec_string(spec_string: &str) -> Result<(), usize> {
-        let allowed = "wWaAirxz#$ ";
+        let allowed = "wWaAirxz#$ ?";
+        let mut shuffle_token_count: usize = 0;
         for (index, ch) in spec_string.char_indices() {
-           if !allowed.contains(ch) {
-               return Err(index)
-           }
+            if !allowed.contains(ch) {
+                return Err(index);
+            }
+            if ch == '?' {
+                shuffle_token_count += 1;
+            }
+        }
+
+        if spec_string.len() - shuffle_token_count < 1 {
+            return Err(spec_string.len());
         }
 
         Ok(())
@@ -170,6 +191,7 @@ impl Display for Specifier {
 //     # - digit, 0-9
 //     $ - symbol
 //     (space) - space character
+//     ? - shuffle the sequence (if present, the token order will be randomized)
 // Examples:
 //     "i w w ###$" => "Medium test phrase 123!"
 //     "ii##$" => "TestPhrase11#"
@@ -191,5 +213,11 @@ mod tests {
         let tester = Specifier::try_parse("w W i r a A $ # x z").unwrap();
 
         println!("Passphrase: {}", tester.get_passphrase());
+    }
+
+    #[test]
+    fn test_shuffle() {
+        let tester = Specifier::try_parse("?aaa###").unwrap();
+        todo!()
     }
 }

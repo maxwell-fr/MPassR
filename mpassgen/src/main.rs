@@ -1,6 +1,6 @@
 use regex::Regex;
 
-use mpass::specifier::Specifier;
+use mpass::Specifier;
 
 fn main() {
     println!("Hello, world!");
@@ -11,10 +11,11 @@ fn main() {
     <body>\
     <<flarg:wW#$>>
     <<frobz:#w W #$>>
-    <<ppwd:W w w w ####>>
+    <<ppwd:i w w w ####>>
+    <<shuffle:?i w w w ####>>
     </body></html>";
 
-    let re = Regex::new(r"<<(?<name>[a-zA-Z]+):(?<spec>[a-zA-Z#$ ]+)>>").unwrap();
+    let re = Regex::new(r"<<(?<name>[a-zA-Z]+):(?<spec>[a-zA-Z#$? ]+)>>").unwrap();
     let caps = re.captures_iter(hay);
 
     for cap in caps {

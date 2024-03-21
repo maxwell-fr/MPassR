@@ -12,6 +12,7 @@ pub enum SpecToken {
     Digit,
     Symbol,
     Space,
+    Shuffle,
 }
 
 impl SpecToken {
@@ -39,6 +40,7 @@ impl TryFrom<char> for SpecToken {
             '#' => Ok(SpecToken::Digit),
             '$' => Ok(SpecToken::Symbol),
             ' ' => Ok(SpecToken::Space),
+            '?' => Ok(SpecToken::Shuffle),
             _ => return Err(SpecTokenError::UnrecognizedToken(value))
         }
     }
